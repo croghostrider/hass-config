@@ -110,7 +110,7 @@ class SectionSensor(Entity):
         self.watcher = watcher
         self.section = section
         self.index = index
-        self.entity_id = ENTITY_ID_FORMAT.format(slugify(section + '_' + str(index)))
+        self.entity_id = ENTITY_ID_FORMAT.format(slugify(f'{section}_{str(index)}'))
         self._latest_item = None
 
     @asyncio.coroutine
@@ -170,11 +170,14 @@ class SectionSensor(Entity):
             genres = self._latest_item.genres or []
             attributes = {
                 'year': self._latest_item.year,
-                'genres': ['unknown'] if not genres else list(map(lambda g: g.tag, genres)),
+                'genres': list(map(lambda g: g.tag, genres))
+                if genres
+                else ['unknown'],
                 'duration': self._latest_item.duration,
                 'watched': self._latest_item.isWatched,
-                'summary': self._latest_item.summary
-                }
+                'summary': self._latest_item.summary,
+            }
+
 
             if self._latest_item.type == 'episode':
                 attributes['show'] = self._latest_item.show().title

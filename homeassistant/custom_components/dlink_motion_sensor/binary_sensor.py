@@ -103,7 +103,6 @@ class DlinkMotionSensor(BinarySensorDevice):
             if self._on:
                 self._on = False
                 self.hass.async_add_job(self.async_update_ha_state(True))
-        else:
-            if not self._on:
-                self._on = True
-                self.hass.async_add_job(self.async_update_ha_state(True))
+        elif not self._on:
+            self._on = True
+            self.hass.async_add_job(self.async_update_ha_state(True))
