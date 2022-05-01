@@ -64,9 +64,7 @@ class SystemLogCollectorSensor(Entity):
     @property
     def state(self):
         """Return state of sensor."""
-        if self.actions:
-            return self.actions[0]['message']
-        return 'none'
+        return self.actions[0]['message'] if self.actions else 'none'
 
     @property
     def should_poll(self):
@@ -77,7 +75,7 @@ class SystemLogCollectorSensor(Entity):
     def state_attributes(self):
         """Return the state attributes."""
         cnt = len(self.actions)
-        state_attr = {
+        return {
             'actions': list(self.actions),
             'no_events': len(self.actions),
             'first': (None if cnt < 1 else self.actions[0]),
@@ -86,4 +84,3 @@ class SystemLogCollectorSensor(Entity):
             'fourth': (None if cnt < 4 else self.actions[3]),
             'fifth': (None if cnt < 5 else self.actions[4]),
         }
-        return state_attr

@@ -49,7 +49,7 @@ class SonarrUpcomingMediaSensor(Entity):
         self.port = conf.get(CONF_PORT)
         self.urlbase = conf.get(CONF_URLBASE)
         if self.urlbase:
-            self.urlbase = "{}/".format(self.urlbase.strip('/'))
+            self.urlbase = f"{self.urlbase.strip('/')}/"
         self.apikey = conf.get(CONF_API_KEY)
         self.days = int(conf.get(CONF_DAYS))
         self.ssl = 's' if conf.get(CONF_SSL) else ''
@@ -70,32 +70,34 @@ class SonarrUpcomingMediaSensor(Entity):
     def device_state_attributes(self):
         import re
         """Return JSON for the sensor."""
-        attributes = {}
-        default = {}
         card_json = []
-        default['title_default'] = '$title'
-        default['line1_default'] = '$episode'
-        default['line2_default'] = '$release'
+        default = {
+            'title_default': '$title',
+            'line1_default': '$episode',
+            'line2_default': '$release',
+        }
+
         default['line3_default'] = '$rating - $runtime'
         default['line4_default'] = '$number - $studio'
         default['icon'] = 'mdi:arrow-down-bold'
         card_json.append(default)
         for show in self.data:
-            card_item = {}
             if 'series' not in show:
                 continue
-            card_item['airdate'] = show['airDateUtc']
-            if days_until(show['airDateUtc'], self._tz) <= 7:
-                card_item['release'] = '$day, $time'
-            else:
-                card_item['release'] = '$day, $date $time'
+            card_item = {
+                'airdate': show['airDateUtc'],
+                'release': '$day, $time'
+                if days_until(show['airDateUtc'], self._tz) <= 7
+                else '$day, $date $time',
+            }
+
             card_item['flag'] = show.get('hasFile', False)
             if 'title' in show['series']:
                 card_item['title'] = show['series']['title']
             else:
                 continue
             card_item['episode'] = show.get('title', '')
-            if 'seasonNumber' and 'episodeNumber' in show:
+            if 'episodeNumber' in show:
                 card_item['number'] = 'S{:02d}E{:02d}'.format(show['seasonNumber'],
                                                         show['episodeNumber'])
             else:
@@ -132,8 +134,7 @@ class SonarrUpcomingMediaSensor(Entity):
             except:
                 card_item['fanart'] = ''
             card_json.append(card_item)
-        attributes['data'] = json.dumps(card_json)
-        return attributes
+        return {'data': json.dumps(card_json)}
 
     def update(self):
         start = get_date(self._tz)
@@ -146,7 +147,7 @@ class SonarrUpcomingMediaSensor(Entity):
                                headers={'X-Api-Key': self.apikey}, timeout=10)
         except OSError:
             _LOGGER.warning("Host %s is not available", self.host)
-            self._state = '%s cannot be reached' % self.host
+            self._state = f'{self.host} cannot be reached'
             return
 
         if api.status_code == 200:
@@ -157,7 +158,7 @@ class SonarrUpcomingMediaSensor(Entity):
             else:
                 self.data = api.json()[:self.max_items]
         else:
-            self._state = '%s cannot be reached' % self.host
+            self._state = f'{self.host} cannot be reached'
 
 
 def get_date(zone, offset=0):

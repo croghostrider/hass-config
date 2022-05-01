@@ -110,10 +110,10 @@ def parse_food_menu(raw_menu, day_list):
         elif started:
             fixed = line.rstrip().lstrip()
             if current_day in result:
-                result[current_day] += ', ' + fixed
+                result[current_day] += f', {fixed}'
             else:
                 result[current_day] = fixed
-            result[current_day] = result[current_day][0:254]
+            result[current_day] = result[current_day][:254]
 
     return result
 
@@ -193,7 +193,7 @@ class DayFoodSensor(Entity):
         self._day_name = day_name
         self._day_number = day_number
         self._link = ""
-        self.entity_id = DOMAIN + '.%s' % slugify(name)
+        self.entity_id = DOMAIN + f'.{slugify(name)}'
         self.subscribe()
 
     def subscribe(self):
@@ -242,9 +242,8 @@ class DayFoodSensor(Entity):
     def device_state_attributes(self):
         """Return the state attributes."""
         weekday_number = datetime.datetime.now().weekday()
-        params = {
+        return {
             ATTR_CUSTOM_UI: 'state-card-food-planning',
             ATTR_LINK: self._link,
             ATTR_TODAY: (self._day_number == weekday_number),
-            }
-        return params
+        }

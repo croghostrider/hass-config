@@ -162,7 +162,7 @@ class MotionSensor:
                 'GetMotionDetectorLogs', ModuleID=self.module_id, MaxCount=1,
                 PageOffset=1, StartTime=0, EndTime='All')
             if 'MotionDetectorLogList' not in resp:
-                _LOGGER.error('log list: ' + str(resp))
+                _LOGGER.error(f'log list: {str(resp)}')
             log_list = resp['MotionDetectorLogList']
             detect_time = log_list['MotionDetectorLog']['TimeStamp']
 
@@ -226,10 +226,10 @@ class NanoSOAPClient:
         text = yield from resp.text()
         parsed = xmltodict.parse(text)
         if 'soap:Envelope' not in parsed:
-            _LOGGER.error("parsed: " + str(parsed))
+            _LOGGER.error(f"parsed: {str(parsed)}")
             raise Exception('probably a bad response')
 
-        return parsed['soap:Envelope']['soap:Body'][method + 'Response']
+        return parsed['soap:Envelope']['soap:Body'][f'{method}Response']
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -249,12 +249,12 @@ if __name__ == '__main__':
         motion = MotionSensor(client)
         yield from client.login()
 
-        if cmd == 'latest_motion':
-            latest = yield from motion.latest_trigger()
-            print('Latest time: ' + str(latest))
-        elif cmd == 'actions':
+        if cmd == 'actions':
             print('Supported actions:')
             print('\n'.join(client.actions))
+        elif cmd == 'latest_motion':
+            latest = yield from motion.latest_trigger()
+            print(f'Latest time: {str(latest)}')
         elif cmd == 'log':
             log = yield from motion.system_log()
 

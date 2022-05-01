@@ -86,7 +86,7 @@ class PlexEntity(Entity):
         self.hass = hass
         self._name = name
         self._state = None
-        self.entity_id = DOMAIN + '.%s' % slugify(name)
+        self.entity_id = DOMAIN + f'.{slugify(name)}'
         self.schedule_update_ha_state()
 
     def set_state(self, state):
@@ -123,7 +123,7 @@ class PlexPlayer:
         items = []
         for item in latest:
             if item.type == 'episode':
-                items.append(item.show().title + ' - ' + item.title)
+                items.append(f'{item.show().title} - {item.title}')
             else:
                 items.append(item.title)
 
@@ -149,10 +149,6 @@ class PlexPlayer:
         return section
 
     def get_latest_unwatched(self, entries, count):
-        items = []
-        for m in entries:
-            if not m.isWatched:
-                items.append(m)
-
+        items = [m for m in entries if not m.isWatched]
         items.sort(key=lambda x: x.addedAt)
         return items[-count:]

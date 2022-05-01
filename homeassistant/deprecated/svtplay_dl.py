@@ -117,8 +117,8 @@ def async_setup(hass, config):
     @asyncio.coroutine
     def async_handle_play(service):
         account = service.data[ATTR_ACCOUNT]
-        if not account in domain[CONF_ACCOUNTS]:
-            _LOGGER.warning('missing account ' + account)
+        if account not in domain[CONF_ACCOUNTS]:
+            _LOGGER.warning(f'missing account {account}')
             return
 
         username = domain[CONF_ACCOUNTS][account][CONF_USERNAME]
@@ -159,7 +159,10 @@ class Svtplay:
 
     @asyncio.coroutine
     def async_feed(self, title):
-        js = yield from get_url(self._hass, 'http://webapi.tv4play.se/play/video_assets?nodes=' + title)
+        js = yield from get_url(
+            self._hass, f'http://webapi.tv4play.se/play/video_assets?nodes={title}'
+        )
+
         data = json.loads(js.decode('utf-8'))
 
         if data['total_hits'] == 0:
@@ -170,7 +173,7 @@ class Svtplay:
         self._url = 'http://www.tv4play.se/program/{0}?video_id={1}'.format(
             program['program_nid'], program['id'])
 
-        _LOGGER.info('Found URL: ' + self._url)
+        _LOGGER.info(f'Found URL: {self._url}')
         return (yield from self.async_play())
 
     @asyncio.coroutine
@@ -197,15 +200,9 @@ class Svtplay:
     def _build_cmd(self, add_account=True):
         cmd = ['/srv/homeassistant/bin/svtplay-dl', '-g']
         if add_account:
-            cmd.append('-u')
-            cmd.append(self._username)
-            cmd.append('-p')
-            cmd.append(self._password)
+            cmd.extend(('-u', self._username, '-p', self._password))
         if self._live:
-            cmd.append('-l')
-            cmd.append('-P')
-            cmd.append('rtmp')
-            cmd.append('-v')
+            cmd.extend(('-l', '-P', 'rtmp', '-v'))
         cmd.append(self._url)
         return ' '.join(cmd)
 
@@ -264,7 +261,7 @@ class SvtPlayEntity(Entity):
         self.hass = hass
         self._name = name
         self._state = None
-        self.entity_id = DOMAIN + '.%s' % slugify(name)
+        self.entity_id = DOMAIN + f'.{slugify(name)}'
         self.schedule_update_ha_state()
 
     def set_state(self, state):

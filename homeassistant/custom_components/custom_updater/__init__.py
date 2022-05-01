@@ -302,7 +302,7 @@ class CustomCardsView(HomeAssistantView):
         """Retrieve custom_card."""
         if '?' in path:
             path = path.split('?')[0]
-        file = "{}/www/{}".format(self.hadir, path)
+        file = f"{self.hadir}/www/{path}"
         if os.path.exists(file):
             msg = "Serving /customcards/{path} from /www/{path}".format(
                 path=path)

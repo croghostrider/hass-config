@@ -142,8 +142,7 @@ class MediaWatcher:
             from plexapi.server import PlexServer
             plex = PlexServer(self._server, None)
 
-            matches = plex.search(search_term)
-            if matches:
+            if matches := plex.search(search_term):
                 match = matches[0]
                 self.searches[match.title] = match.unwatched()
             else:
